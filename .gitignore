@@ -9,5 +9,7 @@ db.sqlite3
 *.ipynb
 
 # User-uploaded files and collected static files
-/media/
-/staticfiles/
+media/
+staticfiles/
+
+setup_docs/
