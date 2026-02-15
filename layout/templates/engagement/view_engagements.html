@@ -1,0 +1,75 @@
+{% extends '_base.html' %}
+{% load markdown_filters %}
+{% block main %}
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Engagements for {{ post.ad.name }}</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Engagements</li>
+                        </ol>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Post Details</h5>
+                                        <p><strong>Ad:</strong> {{ post.ad.name }}</p>
+                                        <p><strong>Group:</strong> {{ post.fb_group.name }}</p>
+                                        <p><strong>Posted At:</strong> {{ post.posted_at|date:"M d, Y H:i" }}</p>
+                                        <p><strong>Post URL:</strong> <a href="{{ post.post_url }}" target="_blank">{{ post.post_url }}</a></p>
+                                        <hr>
+                                        <p><strong>Ad Text:</strong></p>
+                                        <div class="alert alert-light border">
+                                            {{ post.ad.text|markdown }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Engagements</h5>
+                                        <p class="card-text"><strong class="display-4">{{ engagements.count }}</strong></p>
+                                        <a href="{% url 'engagement:add_engagement' post.id %}" class="btn btn-primary">Add Engagement</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-comments me-1"></i>
+                                Engagements
+                            </div>
+                            <div class="card-body">
+                                {% if engagements %}
+                                    {% for engagement in engagements %}
+                                        <div class="card mb-3">
+                                            <div class="card-header">
+                                                <strong>{{ engagement.contact.name }}</strong>
+                                                <small class="text-muted float-end">{{ engagement.created_at|date:"M d, Y H:i" }}</small>
+                                            </div>
+                                            <div class="card-body">
+                                                <p><strong>Content:</strong></p>
+                                                <p>{{ engagement.content }}</p>
+                                                {% if engagement.notes %}
+                                                    <p><strong>Notes:</strong></p>
+                                                    <p>{{ engagement.notes }}</p>
+                                                {% endif %}
+                                                {% if engagement.message_url %}
+                                                    <p><a href="{{ engagement.message_url }}" target="_blank" class="btn btn-sm btn-info">View Message</a></p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No engagements yet. <a href="{% url 'engagement:add_engagement' post.id %}">Add one now</a></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'core:home' %}" class="btn btn-secondary">Back to Dashboard</a>
+                    </div>
+                </main>
+{% endblock main %}
+

@@ -1,0 +1,65 @@
+{% extends '_base.html' %}
+{% block main %}
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Contacts</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Contacts</li>
+                        </ol>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-plus me-1"></i>
+                                <a href="{% url 'engagement:create_contact' %}" class="btn btn-sm btn-primary">Create New Contact</a>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-id-card me-1"></i>
+                                All Contacts
+                            </div>
+                            <div class="card-body">
+                                {% if contacts %}
+                                    <table id="contactsTable" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Facebook URL</th>
+                                                <th>Total Engagements</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for contact in contacts %}
+                                                <tr>
+                                                    <td>{{ contact.name }}</td>
+                                                    <td><a href="{{ contact.fb_url }}" target="_blank">Profile</a></td>
+                                                    <td><span class="badge bg-info">{{ contact.engagements.count }}</span></td>
+                                                    <td>
+                                                        <a href="#" class="btn btn-sm btn-info">Edit</a>
+                                                        <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <p class="text-muted">No contacts created yet. <a href="{% url 'engagement:create_contact' %}">Create one now</a></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </main>
+{% endblock main %}
+{% block extra_js %}
+        <script>
+            window.addEventListener('DOMContentLoaded', event => {
+                const contactsTable = document.getElementById('contactsTable');
+                if (contactsTable) {
+                    new simpleDatatables.DataTable(contactsTable);
+                }
+            });
+        </script>
+{% endblock extra_js %}
+

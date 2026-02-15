@@ -1,0 +1,127 @@
+{%extends '_base.html' %}
+{% block main %}
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Dashboard</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Dashboard</li>
+                        </ol>
+
+                        <!-- Today's Date and Set -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Today's Date</h5>
+                                        <p class="card-text"><strong>{{ today|date:"l, F j, Y" }}</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Today's Set</h5>
+                                        {% if today_set %}
+                                            <p class="card-text"><strong>Set {{ today_set }}</strong></p>
+                                        {% else %}
+                                            <p class="card-text"><em>No posting scheduled for today</em></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Groups -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-users me-1"></i>
+                                Today's Groups (Set {{ today_set }})
+                            </div>
+                            <div class="card-body">
+                                {% if today_groups %}
+                                    <table id="todaygroups" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Group Name</th>
+                                                <th>Set</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for group in today_groups %}
+                                                <tr>
+                                                    <td><a href="{{ group.group_url }}" target="_blank">{{ group.name }}</a></td>
+                                                    <td><span class="badge bg-primary">{{ group.group_set }}</span></td>
+                                                    <td>
+                                                        <a href="{% url 'posts:add_post' group.id %}" class="btn btn-sm btn-primary">Add Post</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <p class="text-muted">No groups scheduled for today.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Post History -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-history me-1"></i>
+                                Post History
+                            </div>
+                            <div class="card-body">
+                                {% if post_history %}
+                                    <table id="posthistory" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Ad Name</th>
+                                                <th>Group</th>
+                                                <th>Posted At</th>
+                                                <th>Last Updated</th>
+                                                <th>Engagements</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for post in post_history %}
+                                                <tr>
+                                                    <td>{{ post.ad.name }}</td>
+                                                    <td>{{ post.fb_group.name }}</td>
+                                                    <td>{{ post.posted_at|date:"M d, Y H:i" }}</td>
+                                                    <td>{{ post.last_updated|date:"M d, Y H:i" }}</td>
+                                                    <td><span class="badge bg-info">{{ post.engagement_count }}</span></td>
+                                                    <td>
+                                                        <a href="{% url 'engagement:view_engagements' post.id %}" class="btn btn-sm btn-info">View Engagements</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <p class="text-muted">No posts yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </main>
+{% endblock main %}
+{% block extra_js %}
+        <script>
+            window.addEventListener('DOMContentLoaded', event => {
+                // Simple-DataTables
+                // https://github.com/fiduswriter/Simple-DataTables/wiki
+
+                const todaygroups = document.getElementById('todaygroups');
+                if (todaygroups) {
+                    new simpleDatatables.DataTable(todaygroups);
+                }
+
+                const posthistory = document.getElementById('posthistory');
+                if (posthistory) {
+                    new simpleDatatables.DataTable(posthistory);
+                }
+            });
+        </script>
+
+{% endblock extra_js %}

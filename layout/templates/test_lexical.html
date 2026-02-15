@@ -1,0 +1,32 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block main %}
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Test Lexical Editor</h1>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-code me-1"></i>
+                                Lexical Editor Test
+                            </div>
+                            <div class="card-body">
+                                <div id="editor-test" class="lexical-editor" data-lexical-editor data-lexical-input="test-input" contenteditable="true"></div>
+                                <textarea id="test-input" class="lexical-editor-input" style="margin-top: 1rem; width: 100%; height: 100px;"></textarea>
+                                <button onclick="copyContent()" class="btn btn-primary mt-3">Copy Content</button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+{% endblock main %}
+{% block extra_js %}
+<script>
+function copyContent() {
+    const textarea = document.getElementById('test-input');
+    const content = textarea.value;
+    navigator.clipboard.writeText(content).then(() => {
+        alert('Content copied to clipboard!');
+    });
+}
+</script>
+{% endblock extra_js %}
+

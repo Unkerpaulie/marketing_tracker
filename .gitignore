@@ -1,0 +1,13 @@
+# django project ignore files
+__pycache__/
+db.sqlite3
+*.pyc
+
+.env
+
+*.log
+*.ipynb
+
+# User-uploaded files and collected static files
+/media/
+/staticfiles/

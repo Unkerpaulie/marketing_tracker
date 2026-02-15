@@ -1,0 +1,25 @@
+<div class="lexical-editor-wrapper">
+    <div class="lexical-toolbar">
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Bold (Ctrl+B)">
+            <i class="fas fa-bold"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Italic (Ctrl+I)">
+            <i class="fas fa-italic"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Code">
+            <i class="fas fa-code"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Heading">
+            <i class="fas fa-heading"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Line Break">
+            <i class="fas fa-arrow-turn-down"></i>
+        </button>
+    </div>
+    <div id="{{ widget.editor_id }}" class="lexical-editor" data-lexical-editor data-lexical-input="{{ widget.input_id }}" contenteditable="true"></div>
+    <textarea name="{{ widget.name }}" id="{{ widget.input_id }}" class="lexical-editor-input">{{ widget.value }}</textarea>
+    <small class="form-text text-muted d-block mt-2">
+        Format your text with bold, italic, and other styles. This content is compatible with Facebook posts.
+    </small>
+</div>
+
