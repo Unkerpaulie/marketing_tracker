@@ -2,39 +2,39 @@
 # Python 3.10+
 
 # Core Django
-Django==5.2.8
-asgiref==3.11.0
-sqlparse==0.5.3
+Django
+asgiref
+sqlparse
 
 # Database
-dj-database-url==3.0.1
+dj-database-url
 
 # Image Processing (for ImageField)
 Pillow
 
 # AWS S3 Integration (for production deployment)
-boto3==1.35.0
-django-storages==1.14.2
-gunicorn==21.3.2
-psycopg2-binary==2.9.1
+boto3
+django-storages
+gunicorn
+psycopg2-binary
 
 # Environment Variables
-python-dotenv==1.2.1
-django-environ==0.12.1
+python-dotenv
+django-environ
 
 # REST Framework (optional, for API endpoints)
-djangorestframework==3.16.1
+djangorestframework
 
 # Authentication (optional)
-django-allauth==65.13.1
-PyJWT==2.10.1
+django-allauth
+PyJWT
 
 # Utilities
-requests==2.32.5
-python-dateutil==2.9.0.post0
-pytz==2025.2
+requests
+python-dateutil
+pytz
 
 # Development & Testing
-pytest==8.0.0
-pytest-django==4.7.0
+pytest
+pytest-django
 
