@@ -10,7 +10,7 @@ sqlparse==0.5.3
 dj-database-url==3.0.1
 
 # Image Processing (for ImageField)
-Pillow==10.3.0
+Pillow
 
 # AWS S3 Integration (for production deployment)
 boto3==1.35.0
