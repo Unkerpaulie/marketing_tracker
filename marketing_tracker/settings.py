@@ -18,12 +18,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize environment variables
 env = environ.Env(
-    DEBUG=(bool, False)  # Default to False in production
+    DEBUG=(bool, False),  # Default to False in production
+    ENVIRONMENT=(str, 'DEV')  # Default to DEV if not specified
 )
 
 # Read environment variables from .env file if it exists (local development)
 environ.Env.read_env(BASE_DIR / '.env')
 
+# Determine environment: 'DEV' or 'AWS'
+ENVIRONMENT = env('ENVIRONMENT')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -85,19 +88,37 @@ WSGI_APPLICATION = 'marketing_tracker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Support DATABASE_URL for production (e.g., PostgreSQL on AWS RDS)
-# For local development, uses SQLite by default
-if env('DATABASE_URL', default=None):
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=env('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-else:
+if ENVIRONMENT == 'DEV':
     # Local development with SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+elif ENVIRONMENT == 'AWS':
+    # AWS production with PostgreSQL (RDS) or other database
+    # Requires DATABASE_URL environment variable
+    database_url = env('DATABASE_URL', default=None)
+    if database_url:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=database_url,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
+    else:
+        # Fallback to SQLite if DATABASE_URL not provided (not recommended for production)
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+else:
+    # Unknown environment - default to SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -140,42 +161,93 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'layout' / 'assets']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Media files (User-uploaded content)
-# https://docs.djangoproject.com/en/5.2/topics/files/
-
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# AWS S3 Configuration (Production)
-# https://django-storages.readthedocs.io/en/latest/backends/amazon-s3.html
+# ============================================================================
+# ENVIRONMENT-SPECIFIC CONFIGURATION
+# ============================================================================
 
-if not DEBUG:
-    # Use S3 for media and static files in production
-    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default=None)
+if ENVIRONMENT == 'DEV':
+    # ========================================================================
+    # DEVELOPMENT ENVIRONMENT (Local)
+    # ========================================================================
+
+    # Static files - served locally
+    STATIC_URL = 'static/'
+    STATICFILES_DIRS = [BASE_DIR / 'layout' / 'assets']
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+    # Media files - stored locally
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+
+elif ENVIRONMENT == 'AWS':
+    # ========================================================================
+    # AWS ENVIRONMENT (EC2, ECS, Lambda, or Elastic Beanstalk)
+    # ========================================================================
+
+    # AWS S3 Configuration
+    # https://django-storages.readthedocs.io/en/latest/backends/amazon-s3.html
+
+    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='us-east-1')
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
 
-    # S3 static settings
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    STATIC_LOCATION = 'static'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-    # S3 public media settings
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-    MEDIA_LOCATION = 'media'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-    # AWS credentials (read from environment variables)
+    # AWS credentials (optional - EC2 instances can use IAM roles)
+    # If using IAM roles, these don't need to be set
     AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
     AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
+
+    # Use AWS S3 for static files
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    STATIC_ROOT = BASE_DIR / 'staticfiles'  # For collectstatic
+    STATICFILES_DIRS = [BASE_DIR / 'layout' / 'assets']
+
+    # Use AWS S3 for media files
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'  # Fallback for local storage
+
+    # Django 4.2+ STORAGES configuration
+    # https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-STORAGES
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+            'OPTIONS': {
+                'bucket_name': AWS_STORAGE_BUCKET_NAME,
+                'region_name': AWS_S3_REGION_NAME,
+                'custom_domain': AWS_S3_CUSTOM_DOMAIN,
+                'object_parameters': AWS_S3_OBJECT_PARAMETERS,
+                'location': 'media',
+                'file_overwrite': False,
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'storages.backends.s3boto3.S3StaticStorage',
+            'OPTIONS': {
+                'bucket_name': AWS_STORAGE_BUCKET_NAME,
+                'region_name': AWS_S3_REGION_NAME,
+                'custom_domain': AWS_S3_CUSTOM_DOMAIN,
+                'object_parameters': AWS_S3_OBJECT_PARAMETERS,
+                'location': 'static',
+            },
+        },
+    }
+
+else:
+    # ========================================================================
+    # UNKNOWN ENVIRONMENT - Default to local file storage
+    # ========================================================================
+
+    STATIC_URL = 'static/'
+    STATICFILES_DIRS = [BASE_DIR / 'layout' / 'assets']
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
